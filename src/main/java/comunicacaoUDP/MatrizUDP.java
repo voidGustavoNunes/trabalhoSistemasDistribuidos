@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package servidorUDP;
+package comunicacaoUDP;
 
 /**
  *
@@ -10,6 +10,13 @@ package servidorUDP;
  */
 public class MatrizUDP {
     String[][] matriz = new String[10][20];
+    
+    
+    public String[][] getMatriz() {
+        String[][] matriz = Matriz();
+        
+        return matriz;
+    }
     
     private String[][] Matriz(){
         int linhas = 10;
@@ -23,16 +30,15 @@ public class MatrizUDP {
         }
 
         //PESSOAS
-        matriz[0][0] = "Henrique";
         matriz[1][0] = "Edson";
-        matriz[2][0] = "Gustavo";
+        matriz[2][0] = "Lays";
         matriz[3][0] = "Priscila";
         matriz[4][0] = "Thiago";
         matriz[5][0] = "Vanderson";
         matriz[6][0] = "Asdrúbal";
         matriz[7][0] = "Daniel";
         matriz[8][0] = "Bianca";
-        matriz[9][0] = "Lays";
+        matriz[9][0] = "Henrique";
         
         //FILMES
         matriz[0][1] = "O Último";
@@ -60,8 +66,8 @@ public class MatrizUDP {
     }
     
     public String leMatriz(){
-        
+
     
-    
+        return null;
     }
 }

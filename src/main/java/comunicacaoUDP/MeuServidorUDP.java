@@ -91,11 +91,21 @@ public class MeuServidorUDP {
                     resposta = filmeNaoAvaliado != null ? filmeNaoAvaliado : "Nenhum filme disponível para avaliação.";
                     
                 } else if (partesRequisicao[0].equals("2")) {
-                    // Implementar: Registrar avaliação do usuário
+                    String tituloFilme = partesRequisicao[2];
+                    int avaliacao = Integer.parseInt(partesRequisicao[3]);
+                    
+                    
+                    Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
+                    avaliacoesUsuario.put(tituloFilme, avaliacao);
+                    avaliacoes.put(nomeUsuario, avaliacoesUsuario);
+
+                    resposta = "Avaliação registrada.";
+                    
                 } else if (partesRequisicao[0].equals("3")) {
                     resposta = recomendarFilme(nomeUsuario);
-                } else if (partesRequisicao[0].equals("4")) {
-                    // Implementar: Retornar lista de avaliações do usuário
+                }else if (partesRequisicao[0].equals("4")) {
+                    Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
+                    resposta = avaliacoesUsuario.toString();
                 }
 
                 DatagramPacket pacoteResposta = new DatagramPacket(

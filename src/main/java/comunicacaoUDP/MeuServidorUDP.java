@@ -7,20 +7,20 @@ package comunicacaoUDP;
  */
 
 import java.net.*;
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MeuServidorUDP {
     
-    private static MatrizUDP matriz =null;
+    private static final MatrizUDP matriz =null;
     
-    private static Map<String, Map<String, Integer>> avaliacoes = new HashMap<>();
+    private static final Map<String, Map<String, Integer>> avaliacoes = new HashMap<>();
     
     // funcao para calcular a distancia euclidiana entre duas avaliacoes de filmes
     public static double calcularDistanciaEuclidiana(Map<String, Integer> avaliacoesUsuario1, Map<String, Integer> avaliacoesUsuario2) {
         double distancia = 0.0;
-
+        
+        // para cada filme de avaliaçoesUsuario1, pega o valor atribuido a avaliação pelo metodo keyset
         for (String filme : avaliacoesUsuario1.keySet()) { //para cada filme de avaliaçõesUsuario1 pega o valor atribuido a avaliação pelo metodo keyset
             if (avaliacoesUsuario2.containsKey(filme)) { //se o filme avaliado pelo usuario1 foi também avaliado pelo usuario2
                 int notaUsuario1 = avaliacoesUsuario1.get(filme); //pega a nota atribuida dos usuarios aos filmes
@@ -48,7 +48,7 @@ public class MeuServidorUDP {
                         .filter(e -> e.getValue() > 0)  // se o filme tiver nota maior que 0 mantemos ele na fila
                         .findFirst() //pega o primeiro da fila que tem o numero maior que 0
                         .map(Map.Entry::getKey) //armazena 
-                        .orElse(""); //else
+                        .orElse(""); //recomendacao baseada na menor distancia
                 }
             }
         }
@@ -59,13 +59,13 @@ public class MeuServidorUDP {
     public static void main(String[] args) {
         
         MatrizUDP matriz = new MatrizUDP(); //matriz de dados 
-        String[][] dados = matriz.getMatriz();
+        String[][] dados = matriz.getMatriz(); //dados da matriz
         
         try {
             DatagramSocket socket =null;
             
             socket= new DatagramSocket(6789); //define a porta
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[1024]; //recebendo a requisição do cliente
 
             while (true) {
                 DatagramPacket requisicao = new DatagramPacket(buffer, buffer.length); //requisicao do cliente
@@ -82,8 +82,8 @@ public class MeuServidorUDP {
                     Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
                     String filmeNaoAvaliado = null;
 
-                    for (String filme : dados[0]) {
-                        if (!avaliacoesUsuario.containsKey(filme)) {
+                    for (String filme : dados[0]) { //percorre a primeira linha que tem os titulos dos filmes
+                        if (!avaliacoesUsuario.containsKey(filme)) { //se o usuario nao avaliou
                             filmeNaoAvaliado = filme;
                             break;
                         }
@@ -91,6 +91,7 @@ public class MeuServidorUDP {
                     resposta = filmeNaoAvaliado != null ? filmeNaoAvaliado : "Nenhum filme disponível para avaliação.";
                     
                 } else if (partesRequisicao[0].equals("2")) {
+                    //avaliação do cliente
                     String tituloFilme = partesRequisicao[2];
                     int avaliacao = Integer.parseInt(partesRequisicao[3]);
                     
@@ -98,10 +99,11 @@ public class MeuServidorUDP {
                     Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
                     avaliacoesUsuario.put(tituloFilme, avaliacao);
                     avaliacoes.put(nomeUsuario, avaliacoesUsuario);
-
+                    
                     resposta = "Avaliação registrada.";
                     
                 } else if (partesRequisicao[0].equals("3")) {
+                    //recomendacao de filme
                     resposta = recomendarFilme(nomeUsuario);
                 }else if (partesRequisicao[0].equals("4")) {
                     Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
@@ -114,7 +116,7 @@ public class MeuServidorUDP {
                     requisicao.getAddress(),
                     requisicao.getPort()
                 );
-                socket.send(pacoteResposta);
+                socket.send(pacoteResposta); // enviando a resposta de volta ao cliente
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -137,7 +137,11 @@ public class FormularioUDP extends javax.swing.JDialog {
 
         if (result == JOptionPane.OK_OPTION) {
             int nota = (int) spinner.getValue();
-            JOptionPane.showMessageDialog(null, "Você avaliou o filme com " + nota + ".");
+            if(txtCampo.getText().isEmpty()){
+                txtResposta.setText("2;Usuário não existe.\n");
+            } else {
+                txtResposta.setText("2;" + txtCampo.getText() + ": Filme - " + nota + ".\n");
+            }
         } else {
             JOptionPane.showMessageDialog(null, "Avaliação cancelada.");
         }

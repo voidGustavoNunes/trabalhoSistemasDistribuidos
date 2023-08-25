@@ -66,7 +66,7 @@ public class MatrizUDP {
         }
 
         if (indiceUsuario == -1) {
-            mensagem = "Usuário " + nomeUsuario + " não existe.\n";
+            mensagem = "1;" + nomeUsuario + ": Usuário não existe.\n";
             return null;
         }
 
@@ -80,7 +80,7 @@ public class MatrizUDP {
         }
 
         if (indiceFilme == -1) {
-            mensagem = "Usuário " + nomeUsuario + " já avaliou todos os filmes.\n";
+            mensagem = "1;" + nomeUsuario + ": Já avaliou todos os filmes.\n";
             return null;
         }
 
@@ -98,7 +98,7 @@ public class MatrizUDP {
         }
 
         if (indiceUsuario == -1) {
-            mensagem = "Usuário " + nomeUsuario + " não existe.\n";
+            mensagem = "1;" + nomeUsuario + ": Usuário não existe.\n";
             return null;
         }
 
@@ -107,13 +107,13 @@ public class MatrizUDP {
             if (filmes[i].equals(tituloFilme)) {
                 indiceFilme = i;
                 matriz[indiceUsuario][indiceFilme] = nota;
-                mensagem = users[indiceUsuario] + " avaliou o filme '" + filmes[indiceFilme] + "' com " + matriz[indiceUsuario][indiceFilme] + ";\n";
+                mensagem = "2;" + users[indiceUsuario] + ": " + filmes[indiceFilme] + " - " + matriz[indiceUsuario][indiceFilme] + ".\n";
                 break;
             }
         }
 
         if (indiceFilme == -1) {
-            mensagem = "Filme " + tituloFilme + " não existe.\n";
+            mensagem = "2;" + users[indiceUsuario] + ": " + tituloFilme + " não existe.\n";
             return null;
         }
 
@@ -131,7 +131,7 @@ public class MatrizUDP {
         }
 
         if (indiceUsuario == -1) {
-            mensagem = "Usuário " + nomeUsuario + " não existe.\n";
+            mensagem = "3;" + nomeUsuario + ": Usuário não existe.\n";
             return null;
         }
 
@@ -162,7 +162,7 @@ public class MatrizUDP {
         for (int i = 1; i < 20; i++) {
             if (matriz[indiceUsuarioMaisProximo][i] > notaMaior) {
                 notaMaior = matriz[indiceUsuarioMaisProximo][i];
-                mensagem = filmes[i];
+                mensagem = "3;" + users[indiceUsuario] + ": " + filmes[i] + ".\n";
             }
         }
 
@@ -180,13 +180,13 @@ public class MatrizUDP {
         }
 
         if (indiceUsuario == -1) {
-            mensagem = "Usuário " + nomeUsuario + " não existe.\n";
+            mensagem = "4;" + nomeUsuario + ": Usuário não existe.\n";
             return null;
         }
 
         for (int i = 1; i < 20; i++) {
             if (matriz[indiceUsuario][i] != 0) {
-                mensagem = mensagem + users[indiceUsuario] + " avaliou o filme '" + filmes[i] + "' com " + matriz[indiceUsuario][i] + ";\n";
+                mensagem = mensagem + "4;" + users[indiceUsuario] + ": " + filmes[i] + " - " + matriz[indiceUsuario][i] + ".\n";
             }
         }
 

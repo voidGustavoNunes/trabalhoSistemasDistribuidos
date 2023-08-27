@@ -1,126 +1,145 @@
-
 package comunicacaoUDP;
 
 /**
  *
  * @author Gustavo
  */
-
 import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class MeuServidorUDP {
-    
-    private static final MatrizUDP matriz =null;
-    
-    private static final Map<String, Map<String, Integer>> avaliacoes = new HashMap<>();
-    
-    // funcao para calcular a distancia euclidiana entre duas avaliacoes de filmes
-    public static double calcularDistanciaEuclidiana(Map<String, Integer> avaliacoesUsuario1, Map<String, Integer> avaliacoesUsuario2) {
-        double distancia = 0.0;
-        
-        // para cada filme de avaliaçoesUsuario1, pega o valor atribuido a avaliação pelo metodo keyset
-        for (String filme : avaliacoesUsuario1.keySet()) { //para cada filme de avaliaçõesUsuario1 pega o valor atribuido a avaliação pelo metodo keyset
-            if (avaliacoesUsuario2.containsKey(filme)) { //se o filme avaliado pelo usuario1 foi também avaliado pelo usuario2
-                int notaUsuario1 = avaliacoesUsuario1.get(filme); //pega a nota atribuida dos usuarios aos filmes
-                int notaUsuario2 = avaliacoesUsuario2.get(filme);
-                distancia += Math.pow(notaUsuario1 - notaUsuario2, 2); //realiza o calculo
-            }
-        }
 
-        return Math.sqrt(distancia);
-    }
-    
-    // recomenda um filme com base nas avaliacoes dos usuarios
-    public static String recomendarFilme(String nomeUsuario) {
-        Map<String, Integer> avaliacoesUsuario = avaliacoes.get(nomeUsuario);
-        double menorDistancia = Double.MAX_VALUE;
-        String filmeRecomendado = "";
+    private static final int PORTA = 6789;
 
-        for (Map.Entry<String, Map<String, Integer>> entry : avaliacoes.entrySet()) {
-            String outroUsuario = entry.getKey();
-            if (!outroUsuario.equals(nomeUsuario)) {
-                double distancia = calcularDistanciaEuclidiana(avaliacoesUsuario, entry.getValue());
-                if (distancia < menorDistancia) {
-                    menorDistancia = distancia;
-                    filmeRecomendado = entry.getValue().entrySet().stream() //pega os filmes da lista e coloca numa fila
-                        .filter(e -> e.getValue() > 0)  // se o filme tiver nota maior que 0 mantemos ele na fila
-                        .findFirst() //pega o primeiro da fila que tem o numero maior que 0
-                        .map(Map.Entry::getKey) //armazena 
-                        .orElse(""); //recomendacao baseada na menor distancia
+    private static String processarRequisicao(String requisicao) {
+        String[] partes = requisicao.split(";");
+
+        int tipoRequisicao = Integer.parseInt(partes[0]);
+        String nomeUsuario = partes[1];
+
+        MatrizUDP matrizUDP = new MatrizUDP();
+        switch (tipoRequisicao) {
+            case 1:
+                // Solicitar título de filme para avaliação
+                int usuario = obterIndiceUsuario(nomeUsuario);
+                List<Integer> filmesNaoAvaliados = matrizUDP.getFilmesNaoAvaliados(usuario);
+
+                if (filmesNaoAvaliados.isEmpty()) {
+                    return "Nenhum filme para avaliação";
                 }
+
+                int filmeSelecionado = filmesNaoAvaliados.get(0); // Seleciona o primeiro filme não avaliado
+                return obterTituloFilme(filmeSelecionado);
+
+            case 2:
+                // Registrar avaliação do usuário para um filme específico
+                String tituloFilme = partes[2];
+                int nota = Integer.parseInt(partes[3]);
+
+                int filme = obterIndiceFilme(tituloFilme);
+                usuario = obterIndiceUsuario(nomeUsuario);
+
+                matrizUDP.registrarAvaliacao(usuario, filme, nota);
+
+                return "Avaliação registrada com sucesso";
+
+            case 3:
+                // Solicitar recomendação de filme ou série
+                usuario = obterIndiceUsuario(nomeUsuario);
+
+                filmeSelecionado = matrizUDP.recomendarFilme(usuario);
+                if (filmeSelecionado == -1) {
+                    return "Não foi possível recomendar um filme";
+                }
+
+                return obterTituloFilme(filmeSelecionado);
+
+            case 4:
+                // Solicitar lista de avaliações feitas pelo usuário
+                usuario = obterIndiceUsuario(nomeUsuario);
+                StringBuilder listaAvaliacoes = new StringBuilder("Suas avaliações:\n");
+
+                List<Integer> filmesAvaliados = matrizUDP.getFilmesAvaliados(usuario);
+                for (int filmeAvaliado : filmesAvaliados) {
+                    int avaliacao = matrizUDP.getAvaliacao(usuario, filmeAvaliado);
+                    String titulo = obterTituloFilme(filmeAvaliado);
+
+                    listaAvaliacoes.append(titulo).append(": ").append(avaliacao).append("\n");
+                }
+
+                return listaAvaliacoes.toString();
+
+            default:
+                return "Requisição inválida";
+        }
+    }
+
+    private static int obterIndiceUsuario(String nomeUsuario) {
+        String[] usuarios = {"Edson", "Lays", "Priscila", "Thiago", "Vanderson", "Asdrúbal", "Daniel",
+            "Bianca", "Henrique"}; // Lista de nomes de usuários
+
+        for (int i = 0; i < usuarios.length; i++) {
+            if (usuarios[i].equals(nomeUsuario)) {
+                return i; // Retorna o índice do usuário
             }
         }
 
-        return filmeRecomendado;
+        return -1; // Usuário não encontrado
     }
-    
+
+    private static int obterIndiceFilme(String tituloFilme) {
+        String[] titulos = {"O Último", "Os Três Porquinhos", "A Escuridão", "Tubarão", "Homem de Ferro",
+            "As tranças do Rei Careca", "Barbie e o Castelo de Areia", "Blade", "Matrix",
+            "Homem Aranha 2", "A volta dos que não foram", "A perigosa mordida dos Cachorros sem Dentes",
+            "A dança do Créu", "A fuga das Galinhas", "A Branca de Neve", "Piranhas em Alto Mar",
+            "Sítio do Pica Pau Amarelo", "Bob Esponja", "A Fantástica Fábrica de Chocolates"}; // Lista de títulos de filmes
+
+        for (int i = 0; i < titulos.length; i++) {
+            if (titulos[i].equals(tituloFilme)) {
+                return i; // Retorna o índice do filme
+            }
+        }
+
+        return -1; // Filme não encontrado
+    }
+
+    private static String obterTituloFilme(int indiceFilme) {
+        String[] titulos = {"O Último", "Os Três Porquinhos", "A Escuridão", "Tubarão", "Homem de Ferro",
+            "As tranças do Rei Careca", "Barbie e o Castelo de Areia", "Blade", "Matrix",
+            "Homem Aranha 2", "A volta dos que não foram", "A perigosa mordida dos Cachorros sem Dentes",
+            "A dança do Créu", "A fuga das Galinhas", "A Branca de Neve", "Piranhas em Alto Mar",
+            "Sítio do Pica Pau Amarelo", "Bob Esponja", "A Fantástica Fábrica de Chocolates"}; // Lista de títulos de filmes
+
+        if (indiceFilme >= 0 && indiceFilme < titulos.length) {
+            return titulos[indiceFilme];
+        }
+
+        return "Filme não encontrado";
+    }
+
     public static void main(String[] args) {
-        
-        MatrizUDP matriz = new MatrizUDP(); //matriz de dados 
-        String[][] dados = matriz.getMatriz(); //dados da matriz
-        
         try {
-            DatagramSocket socket =null;
-            
-            socket= new DatagramSocket(6789); //define a porta
+            DatagramSocket socket = new DatagramSocket(PORTA);
+
             byte[] buffer = new byte[1024]; //recebendo a requisição do cliente
 
             while (true) {
-                DatagramPacket requisicao = new DatagramPacket(buffer, buffer.length); //requisicao do cliente
-                socket.receive(requisicao);
+                DatagramPacket requisicaoPacket = new DatagramPacket(buffer, buffer.length); //requisicao do cliente
+                socket.receive(requisicaoPacket);
 
-                String dadosRequisicao = new String(requisicao.getData(), 0, requisicao.getLength());
-                String[] partesRequisicao = dadosRequisicao.split(";");
+                String requisicao = new String(requisicaoPacket.getData(), 0, requisicaoPacket.getLength());
+                String resposta = processarRequisicao(requisicao);
 
-                String resposta = "";
-                String nomeUsuario = partesRequisicao[1];
+                InetAddress clientAddress = requisicaoPacket.getAddress();
+                int clientPort = requisicaoPacket.getPort();
+                byte[] responseData = resposta.getBytes();
+                DatagramPacket respostaPacket = new DatagramPacket(responseData, responseData.length, clientAddress, clientPort);
 
-                if (partesRequisicao[0].equals("1")) {
-                    // Verificar os filmes que o usuário ainda não avaliou
-                    Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
-                    String filmeNaoAvaliado = null;
-
-                    for (String filme : dados[0]) { //percorre a primeira linha que tem os titulos dos filmes
-                        if (!avaliacoesUsuario.containsKey(filme)) { //se o usuario nao avaliou
-                            filmeNaoAvaliado = filme;
-                            break;
-                        }
-                    }
-                    resposta = filmeNaoAvaliado != null ? filmeNaoAvaliado : "Nenhum filme disponível para avaliação.";
-                    
-                } else if (partesRequisicao[0].equals("2")) {
-                    //avaliação do cliente
-                    String tituloFilme = partesRequisicao[2];
-                    int avaliacao = Integer.parseInt(partesRequisicao[3]);
-                    
-                    
-                    Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
-                    avaliacoesUsuario.put(tituloFilme, avaliacao);
-                    avaliacoes.put(nomeUsuario, avaliacoesUsuario);
-                    
-                    resposta = "Avaliação registrada.";
-                    
-                } else if (partesRequisicao[0].equals("3")) {
-                    //recomendacao de filme
-                    resposta = recomendarFilme(nomeUsuario);
-                }else if (partesRequisicao[0].equals("4")) {
-                    Map<String, Integer> avaliacoesUsuario = avaliacoes.getOrDefault(nomeUsuario, new HashMap<>());
-                    resposta = avaliacoesUsuario.toString();
-                }
-
-                DatagramPacket pacoteResposta = new DatagramPacket(
-                    resposta.getBytes(),
-                    resposta.length(),
-                    requisicao.getAddress(),
-                    requisicao.getPort()
-                );
-                socket.send(pacoteResposta); // enviando a resposta de volta ao cliente
+                socket.send(respostaPacket); // enviando a resposta de volta ao cliente
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
+
 }

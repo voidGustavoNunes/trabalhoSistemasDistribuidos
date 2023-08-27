@@ -1,25 +1,24 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package interfaceFormulario;
 
 import comunicacaoUDP.ClienteUDP;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
- * @author Gustavo
+ * @author CONEXOS
  */
-public class FormularioUDP extends javax.swing.JDialog {
+public class Formulario extends javax.swing.JFrame {
 
-    private ClienteUDP clienteUDP;
     /**
-     * Creates new form FormularioUDP
+     * Creates new form Formulario
      */
-    public FormularioUDP(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public Formulario() {
         initComponents();
-        clienteUDP = new ClienteUDP();
     }
 
     /**
@@ -32,14 +31,18 @@ public class FormularioUDP extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        txtCampo = new javax.swing.JTextField();
-        btnEnviar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtResposta = new javax.swing.JTextArea();
+        btnEnviar = new javax.swing.JButton();
+        txtCampo = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("Digite Aqui:");
+
+        txtResposta.setColumns(20);
+        txtResposta.setRows(5);
+        jScrollPane1.setViewportView(txtResposta);
 
         btnEnviar.setText("Enviar");
         btnEnviar.addActionListener(new java.awt.event.ActionListener() {
@@ -47,10 +50,6 @@ public class FormularioUDP extends javax.swing.JDialog {
                 btnEnviarActionPerformed(evt);
             }
         });
-
-        txtResposta.setColumns(20);
-        txtResposta.setRows(5);
-        jScrollPane1.setViewportView(txtResposta);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -66,7 +65,7 @@ public class FormularioUDP extends javax.swing.JDialog {
                         .addComponent(txtCampo, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnEnviar)))
-                .addContainerGap(9, Short.MAX_VALUE))
+                .addContainerGap(8, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -86,8 +85,13 @@ public class FormularioUDP extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarActionPerformed
-        // TODO add your handling code here:
-        txtResposta.setText(clienteUDP.enviaMensagem(txtCampo.getText()));
+        try {
+            // TODO add your handling code here:
+            txtResposta.setText(ClienteUDP.enviarRequisicao(txtCampo.getText()));
+            //        txtResposta.setText(clienteUDP.enviaMensagem(txtCampo.getText()));
+        } catch (Exception ex) {
+            Logger.getLogger(Formulario.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_btnEnviarActionPerformed
 
     /**
@@ -107,27 +111,20 @@ public class FormularioUDP extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormularioUDP.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Formulario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormularioUDP.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Formulario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormularioUDP.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Formulario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormularioUDP.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Formulario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
-        /* Create and display the dialog */
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FormularioUDP dialog = new FormularioUDP(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
+                new Formulario().setVisible(true);
             }
         });
     }

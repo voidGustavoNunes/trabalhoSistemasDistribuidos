@@ -4,70 +4,85 @@
  */
 package comunicacaoUDP;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Gustavo
  */
 public class MatrizUDP {
-    String[][] matriz = new String[10][20];
-    
-    
-    public String[][] getMatriz() {
-        String[][] matriz = Matriz();
-        
-        return matriz;
+    private static int[][] matrizAvaliacoes;
+
+    public MatrizUDP() {
+        if(matrizAvaliacoes == null){
+            matrizAvaliacoes = new int[10][20];
+        }
+        // Inicialize a matriz com valores 0
+    }
+
+    public int getAvaliacao(int usuario, int filme) {
+        return matrizAvaliacoes[usuario][filme];
+    }
+
+    public void registrarAvaliacao(int usuario, int filme, int nota) {
+        matrizAvaliacoes[usuario][filme] = nota;
+    }
+
+    public List<Integer> getFilmesNaoAvaliados(int usuario) {
+        List<Integer> filmesNaoAvaliados = new ArrayList<>();
+        for (int filme = 0; filme < matrizAvaliacoes[usuario].length; filme++) {
+            if (matrizAvaliacoes[usuario][filme] == 0) {
+                filmesNaoAvaliados.add(filme);
+            }
+        }
+        return filmesNaoAvaliados;
     }
     
-    private String[][] Matriz(){
-        int linhas = 10;
-        int colunas = 20;
-      
+    public List<Integer> getFilmesAvaliados(int usuario) {
+        List<Integer> filmesAvaliados = new ArrayList<>();
+        for (int filme = 0; filme < matrizAvaliacoes[usuario].length; filme++) {
+            if (matrizAvaliacoes[usuario][filme] > 0) {
+                filmesAvaliados.add(filme);
+            }
+        }
+        return filmesAvaliados;
+    }
 
-        for (int i = 0; i < linhas; i++) {
-            for (int j = 0; j < colunas; j++) {
-                matriz[i][j] = "0";
+    public int recomendarFilme(int usuario) {
+        List<Integer> filmesNaoAvaliados = getFilmesNaoAvaliados(usuario);
+
+        int filmeRecomendado = -1;
+        double menorDistancia = Double.MAX_VALUE;
+
+        for (int outroUsuario = 0; outroUsuario < matrizAvaliacoes.length; outroUsuario++) {
+            if (outroUsuario != usuario) {
+                double distancia = calcularDistanciaEuclidiana(usuario, outroUsuario);
+                if (distancia < menorDistancia) {
+                    for (int filme : filmesNaoAvaliados) {
+                        if (matrizAvaliacoes[outroUsuario][filme] > 0) {
+                            filmeRecomendado = filme;
+                            menorDistancia = distancia;
+                        }
+                    }
+                }
             }
         }
 
-        //PESSOAS
-        matriz[1][0] = "Edson";
-        matriz[2][0] = "Lays";
-        matriz[3][0] = "Priscila";
-        matriz[4][0] = "Thiago";
-        matriz[5][0] = "Vanderson";
-        matriz[6][0] = "Asdrúbal";
-        matriz[7][0] = "Daniel";
-        matriz[8][0] = "Bianca";
-        matriz[9][0] = "Henrique";
-        
-        //FILMES
-        matriz[0][1] = "O Último";
-        matriz[0][2] = "Os Três Porquinhos";
-        matriz[0][3] = "A Escuridão";
-        matriz[0][4] = "Tubarão";
-        matriz[0][5] = "Homem de Ferro";
-        matriz[0][6] = "As tranças do Rei Careca";
-        matriz[0][7] = "Barbie e o Castelo de Areia";
-        matriz[0][8] = "Blade";
-        matriz[0][9] = "Matrix";
-        matriz[0][10] = "Homem Aranha 2";
-        matriz[0][11] = "A volta dos que não foram";
-        matriz[0][12] = "A perigosa mordida dos Cachorros sem Dentes";
-        matriz[0][13] = "A dança do Créu";
-        matriz[0][14] = "A fuga das Galinhas";
-        matriz[0][15] = "A Branca de Neve";
-        matriz[0][16] = "Piranhas em Alto Mar";
-        matriz[0][17] = "Sítio do Pica Pau Amarelo";
-        matriz[0][18] = "Bob Esponja";
-        matriz[0][19] = "A Fantástica Fábrica de Chocolates";
-        
-        
-        return matriz;
+        return filmeRecomendado;
     }
-    
-    public String leMatriz(){
 
-    
-        return null;
+    public double calcularDistanciaEuclidiana(int usuario1, int usuario2) {
+        int numFilmes = matrizAvaliacoes[0].length;
+        double somaQuadrados = 0.0;
+
+        for (int filme = 0; filme < numFilmes; filme++) {
+            int avaliacaoUsuario1 = matrizAvaliacoes[usuario1][filme];
+            int avaliacaoUsuario2 = matrizAvaliacoes[usuario2][filme];
+
+            somaQuadrados += Math.pow(avaliacaoUsuario1 - avaliacaoUsuario2, 2);
+        }
+
+        return Math.sqrt(somaQuadrados);
     }
 }

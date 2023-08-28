@@ -22,14 +22,17 @@ public class MeuServidorUDP {
             case 1:
                 // Solicitar título de filme para avaliação
                 int usuario = obterIndiceUsuario(nomeUsuario);
-                List<Integer> filmesNaoAvaliados = matrizUDP.getFilmesNaoAvaliados(usuario);
-
-                if (filmesNaoAvaliados.isEmpty()) {
-                    return "Nenhum filme para avaliação";
+                if (usuario == -1) {
+                    return "Nenhum usuário encontrado";
                 }
+                    List<Integer> filmesNaoAvaliados = matrizUDP.getFilmesNaoAvaliados(usuario);
 
-                int filmeSelecionado = filmesNaoAvaliados.get(0); // Seleciona o primeiro filme não avaliado
-                return obterTituloFilme(filmeSelecionado);
+                    if (filmesNaoAvaliados.isEmpty()) {
+                        return "Nenhum filme para avaliação";
+                    }
+
+                    int filmeSelecionado = filmesNaoAvaliados.get(0); // Seleciona o primeiro filme não avaliado
+                    return obterTituloFilme(filmeSelecionado);
 
             case 2:
                 // Registrar avaliação do usuário para um filme específico
@@ -37,8 +40,15 @@ public class MeuServidorUDP {
                 int nota = Integer.parseInt(partes[3]);
 
                 int filme = obterIndiceFilme(tituloFilme);
+                if(filme == -1){
+                    return "Nenhum filme encontrado";
+                }
+                
                 usuario = obterIndiceUsuario(nomeUsuario);
-
+                if(usuario == -1){
+                    return "Nenhum usuário encontrado";
+                }
+                
                 matrizUDP.registrarAvaliacao(usuario, filme, nota);
 
                 return "Avaliação registrada com sucesso";
@@ -46,7 +56,11 @@ public class MeuServidorUDP {
             case 3:
                 // Solicitar recomendação de filme ou série
                 usuario = obterIndiceUsuario(nomeUsuario);
-
+                
+                if(usuario == -1){
+                    return "Nenhum usuário encontrado";
+                }
+                
                 filmeSelecionado = matrizUDP.recomendarFilme(usuario);
                 if (filmeSelecionado == -1) {
                     return "Não foi possível recomendar um filme";
@@ -57,14 +71,23 @@ public class MeuServidorUDP {
             case 4:
                 // Solicitar lista de avaliações feitas pelo usuário
                 usuario = obterIndiceUsuario(nomeUsuario);
+                if(usuario == -1){
+                    return "Nenhum usuário encontrado";
+                }
+                
                 StringBuilder listaAvaliacoes = new StringBuilder("Suas avaliações:\n");
 
                 List<Integer> filmesAvaliados = matrizUDP.getFilmesAvaliados(usuario);
-                for (int filmeAvaliado : filmesAvaliados) {
-                    int avaliacao = matrizUDP.getAvaliacao(usuario, filmeAvaliado);
-                    String titulo = obterTituloFilme(filmeAvaliado);
 
-                    listaAvaliacoes.append(titulo).append(": ").append(avaliacao).append("\n");
+                if (filmesAvaliados.isEmpty()) {
+                    listaAvaliacoes.append("Nenhuma avaliação feita");
+                } else {
+                    for (int filmeAvaliado : filmesAvaliados) {
+                        int avaliacao = matrizUDP.getAvaliacao(usuario, filmeAvaliado);
+                        String titulo = obterTituloFilme(filmeAvaliado);
+
+                        (listaAvaliacoes).append(titulo).append(": ").append(avaliacao).append("\n");
+                    }
                 }
 
                 return listaAvaliacoes.toString();
